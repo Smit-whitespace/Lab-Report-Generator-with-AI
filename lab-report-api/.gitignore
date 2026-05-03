@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+*.db
+report_*.pdf
+.edge-test-profile/
+lab_reports.db

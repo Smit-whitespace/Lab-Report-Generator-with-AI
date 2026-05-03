@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab Report Generator</title>
+  <link rel="stylesheet" href="/frontend/styles.css?v=3">
+</head>
+<body>
+  <div id="loginView" class="auth-shell">
+    <main class="auth-panel">
+      <div>
+        <p class="eyebrow">Local Lab System</p>
+        <h1>Lab Report Generator</h1>
+      </div>
+      <form id="loginForm" class="stack">
+        <label>
+          Username
+          <input id="loginUsername" autocomplete="username" required>
+        </label>
+        <label>
+          Password
+          <input id="loginPassword" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Sign in</button>
+      </form>
+      <p id="loginMessage" class="message"></p>
+    </main>
+  </div>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">Lab API</p>
+        <h2 id="labName">Dashboard</h2>
+      </div>
+      <nav class="nav">
+        <button type="button" data-view="dashboard" class="active">Dashboard</button>
+        <button type="button" data-view="records">Records</button>
+        <button type="button" data-view="templates">Templates</button>
+        <button type="button" data-view="users" data-admin>Users</button>
+        <button type="button" data-view="hospital" data-admin>Hospital</button>
+        <button type="button" data-view="settings">Settings</button>
+        <button type="button" data-view="audit" data-admin>Audit</button>
+      </nav>
+      <div class="user-strip">
+        <div>
+          <strong id="currentUserName"></strong>
+          <span id="currentUserRole"></span>
+        </div>
+        <button id="logoutButton" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section id="dashboard" class="view active">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Overview</p>
+            <h1>Daily workbench</h1>
+          </div>
+          <button id="refreshButton" type="button">Refresh</button>
+        </div>
+        <div class="metric-grid">
+          <article class="metric">
+            <span>Reports</span>
+            <strong id="recordCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Templates</span>
+            <strong id="templateCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>AI Description</span>
+            <strong id="aiStatus">Off</strong>
+          </article>
+        </div>
+      </section>
+
+      <section id="records" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Reports</p>
+            <h1>Patient records</h1>
+          </div>
+        </div>
+
+        <form id="recordForm" class="panel stack" data-technician>
+          <h2>New report</h2>
+          <div class="form-grid">
+            <label>
+              Template
+              <select id="recordTemplate" required></select>
+            </label>
+            <label>
+              Patient name
+              <input id="patientName" required>
+            </label>
+            <label>
+              Age
+              <input id="patientAge" type="number" min="0" required>
+            </label>
+            <label>
+              Gender
+              <select id="patientGender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label>
+              Phone
+              <input id="patientPhone">
+            </label>
+            <label>
+              Referring doctor
+              <input id="referringDoctor">
+            </label>
+          </div>
+          <div id="resultInputs" class="result-grid"></div>
+          <button type="submit">Create report</button>
+          <p id="recordMessage" class="message"></p>
+        </form>
+
+        <div class="panel">
+          <div class="section-head">
+            <h2>Recent reports</h2>
+          </div>
+          <div id="recordsTable" class="table"></div>
+        </div>
+      </section>
+
+      <section id="templates" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Tests</p>
+            <h1>Report templates</h1>
+          </div>
+        </div>
+
+        <form id="templateForm" class="panel stack" data-admin>
+          <h2>New template</h2>
+          <label>
+            Test name
+            <input id="templateName" required>
+          </label>
+          <div id="templateParameters" class="parameter-list"></div>
+          <div class="button-row">
+            <button type="button" id="addParameterButton">Add parameter</button>
+            <div class="button-row compact-actions">
+              <button type="button" id="cancelTemplateEditButton" class="secondary hidden">Cancel</button>
+              <button type="submit" id="saveTemplateButton">Save template</button>
+            </div>
+          </div>
+          <p id="templateMessage" class="message"></p>
+        </form>
+
+        <div class="panel">
+          <h2>Templates</h2>
+          <div id="templatesTable" class="table"></div>
+        </div>
+      </section>
+
+      <section id="users" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Access</p>
+            <h1>Users</h1>
+          </div>
+        </div>
+        <form id="userForm" class="panel stack">
+          <h2>New user</h2>
+          <div class="form-grid">
+            <label>Name<input id="userName" required></label>
+            <label>Username<input id="userUsername" required></label>
+            <label>Email<input id="userEmail" type="email" required></label>
+            <label>Password<input id="userPassword" type="password" required></label>
+            <label>
+              Role
+              <select id="userRole" required>
+                <option value="admin">Admin</option>
+                <option value="technician">Technician</option>
+                <option value="doctor">Doctor</option>
+              </select>
+            </label>
+          </div>
+          <div class="button-row compact-actions">
+            <button type="button" id="cancelUserEditButton" class="secondary hidden">Cancel</button>
+            <button type="submit" id="saveUserButton">Create user</button>
+          </div>
+          <p id="userMessage" class="message"></p>
+        </form>
+        <div class="panel">
+          <h2>Users</h2>
+          <div id="usersTable" class="table"></div>
+        </div>
+      </section>
+
+      <section id="hospital" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Profile</p>
+            <h1>Hospital details</h1>
+          </div>
+        </div>
+        <form id="hospitalForm" class="panel stack">
+          <div class="form-grid">
+            <label>Name<input id="hospitalName" required></label>
+            <label>Phone<input id="hospitalPhone"></label>
+            <label>Email<input id="hospitalEmail" type="email"></label>
+            <label>Registration number<input id="hospitalRegistration"></label>
+          </div>
+          <label>Address<textarea id="hospitalAddress"></textarea></label>
+          <button type="submit">Save hospital</button>
+          <p id="hospitalMessage" class="message"></p>
+        </form>
+      </section>
+
+      <section id="settings" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Controls</p>
+            <h1>Settings</h1>
+          </div>
+        </div>
+        <div class="panel setting-row">
+          <div>
+            <h2>AI generated description</h2>
+            <p id="aiSettingText">Off</p>
+          </div>
+          <label class="switch">
+            <input id="aiToggle" type="checkbox">
+            <span></span>
+          </label>
+        </div>
+        <div class="panel button-row" data-admin>
+          <button id="exportRecordsButton" type="button">Export records</button>
+          <button id="exportDatabaseButton" type="button">Backup database</button>
+        </div>
+      </section>
+
+      <section id="audit" class="view">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Logs</p>
+            <h1>Audit trail</h1>
+          </div>
+        </div>
+        <div class="panel">
+          <div id="auditTable" class="table"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="confirmModal" class="modal-backdrop hidden">
+    <section class="modal">
+      <h2 id="confirmTitle">Confirm action</h2>
+      <p id="confirmBody"></p>
+      <label>
+        Confirmation text
+        <input id="confirmInput">
+      </label>
+      <div class="button-row">
+        <button type="button" id="cancelConfirmButton" class="secondary">Cancel</button>
+        <button type="button" id="confirmActionButton" class="danger">Confirm</button>
+      </div>
+      <p id="confirmMessage" class="message"></p>
+    </section>
+  </div>
+  <script src="/frontend/app.js?v=3"></script>
+</body>
+</html>
