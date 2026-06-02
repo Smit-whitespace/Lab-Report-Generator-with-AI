@@ -1,96 +1,132 @@
-# Lab Report API
+# Lab Report Generator with AI
 
-Production-ready FastAPI service and lightweight frontend for generating, storing, and retrieving lab reports.
+A full-stack lab report management system built with FastAPI. Handles the complete workflow — from report creation and PDF generation to role-based access and AI-assisted clinical summaries — with all core features running fully offline.
 
-Contents
-- app/ — FastAPI backend (routes, models, DB).
-- frontend/ — static UI (index.html, app.js, styles.css).
-- requirements.txt — Python dependencies.
-- .env — environment overrides.
+![Dashboard Screenshot](./screenshots/dashboard.png)
 
-Built with
-- FastAPI, Pydantic
-- SQLAlchemy (or equivalent persistence layer)
-- Report generation tools (e.g., ReportLab)
-- Optional integrations: OpenAI client (present in environment), other analytics
+---
 
-Quickstart (local)
-1. Clone
-    git clone https://github.com/Smit-whitespace/Lab-Report-Generator-with-AI && cd lab-report-api
+## What It Does
 
-2. Create venv and install
-    python -m venv .venv
-    .venv\Scripts\activate  (Windows) or source .venv/bin/activate (macOS/Linux)
-    pip install -r requirements.txt
+Lab staff log in and create reports by entering patient details and test results. The system stores everything, generates a formatted PDF, and — when an OpenAI API key is configured — adds an AI-generated clinical summary to the report.
 
-3. Configure environment
-    Create `.env` and set required keys:
-    - DATABASE_URL=sqlite:///./data.db
-    - STORAGE_PATH=./storage
-    - SECRET_KEY=<strong-secret>
-    - OPENAI_API_KEY=<optional>
-    - PORT=8000
+**Example AI summary:**
+> Hemoglobin and RBC values are below typical reference ranges. Clinical correlation is recommended. Please review alongside patient history and other investigations.
 
-4. Initialize DB
-    - If migrations exist: run the migration tool used by the project (e.g., alembic upgrade head)
-    - Otherwise ensure the configured database is reachable; the app will create tables on first run if configured to do so.
+If no API key is present or the request fails, the system falls back gracefully and the rest of the report is unaffected.
 
-5. Run backend
-    uvicorn app.main:app --reload --host 0.0.0.0 --port ${PORT:-8000}
+---
 
-6. Open frontend
-    - Quick: open frontend/index.html in a browser
-    - Or serve static files from FastAPI (if configured) at http://localhost:${PORT}
+## Role-Based Access Control
 
-API (examples)
-- Health
-  GET /health
+| Role | Permissions |
+|---|---|
+| **Admin** | Manage users, test templates, hospital settings, AI settings, exports, audit logs |
+| **Technician** | Create reports, enter lab results, generate and download PDFs, view records |
+| **Doctor** | View reports, view AI summaries, download PDFs (read-only) |
 
-- Reports
-  POST /api/reports
-     - Body: JSON with report payload (patient, tests, metadata)
-     - Returns: report id and status (queued/generated)
+---
 
-  GET /api/reports/{id}
-     - Returns: report metadata and download URL (PDF)
+## Offline-First Architecture
 
-- Attachments / Storage
-  GET /api/storage/{filename}
+All core functionality runs on your local machine or server with no internet required:
 
-Use curl:
-curl -X POST http://localhost:8000/api/reports -H "Content-Type: application/json" -d '{"patient": {...}}'
+- Login and authentication
+- User management
+- Test template management
+- Lab report creation and storage
+- PDF generation
+- Audit logs
+- Hospital settings
+- Record viewing and search
 
-Development
-- Code layout:
-  - app/main.py — application entry
-  - app/api/ — route definitions
-  - app/models/, app/schemas/ — DB models and Pydantic schemas
-  - app/db/ — DB session and migrations
-- Run with auto-reload for development: uvicorn app.main:app --reload
-- Linting & formatting: use black/ruff/flake8 as preferred
+The only feature requiring internet is AI summary generation. If unavailable, the app returns a clear error and continues normally.
 
-Testing
-- Add tests under tests/ and run:
-  pytest -q
+---
 
-Deployment
-- Containerize with a small Dockerfile; expose PORT and mount persistent STORAGE_PATH.
-- Use production ASGI server (uvicorn/gunicorn with uvicorn workers) behind a reverse proxy.
-- Ensure secure SECRET_KEY and DB credentials in environment; enable HTTPS.
+## Tech Stack
 
-Observability
-- Add structured logging and error tracking (Sentry, etc.) as needed.
-- Expose metrics endpoint or integrate with Prometheus if required.
+- **Backend** — FastAPI, Python
+- **Database** — SQLite (V1) · PostgreSQL (V2, current)
+- **PDF Generation** — ReportLab
+- **AI Integration** — OpenAI API (optional)
+- **Frontend** — Vanilla HTML/CSS/JS
 
-Contributing
-- Fork -> branch -> PR
-- Include tests for new features/bug fixes
-- Follow repository coding standards
+---
 
-License
-- MIT (or replace with project license of choice)
+## Quickstart
 
-Contact / Support
-- File issues or PRs in this repository.
+**1. Clone the repo**
+```bash
+git clone https://github.com/Smit-whitespace/Lab-Report-Generator-with-AI
+cd Lab-Report-Generator-with-AI
+```
 
-Note: adapt the environment keys and DB migration steps to match project-specific tooling present in app/db and requirements.txt.
+**2. Create a virtual environment and install dependencies**
+```bash
+python -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+.venv\Scripts\activate           # Windows
+pip install -r requirements.txt
+```
+
+**3. Configure environment**
+
+Create a `.env` file in the root directory:
+```env
+DATABASE_URL=sqlite:///./data.db
+STORAGE_PATH=./storage
+SECRET_KEY=your-secret-key-here
+OPENAI_API_KEY=sk-...            # Optional — AI summaries only
+PORT=8000
+```
+
+**4. Run the backend**
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**5. Open the frontend**
+
+Open `frontend/index.html` in a browser, or navigate to `http://localhost:8000` if static files are served by FastAPI.
+
+---
+
+## API Overview
+
+```
+GET  /health                    # Health check
+POST /api/reports               # Create a new report
+GET  /api/reports/{id}          # Fetch report metadata and PDF URL
+GET  /api/storage/{filename}    # Download stored file
+```
+
+**Example:**
+```bash
+curl -X POST http://localhost:8000/api/reports \
+  -H "Content-Type: application/json" \
+  -d '{"patient": {"name": "John Doe", "age": 34}, "tests": [...]}'
+```
+
+---
+
+## Project Structure
+
+```
+app/
+├── main.py          # Application entry point
+├── api/             # Route definitions
+├── models/          # Database models
+├── schemas/         # Pydantic schemas
+└── db/              # Database session and setup
+frontend/
+├── index.html
+├── app.js
+└── styles.css
+```
+
+---
+
+## License
+
+MIT
